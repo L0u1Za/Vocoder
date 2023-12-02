@@ -50,19 +50,6 @@
           }
         }
       ]
-    },
-    "test": {
-      "batch_size": 3,
-      "num_workers": 5,
-      "datasets": [
-        {
-          "type": "LJspeechDataset",
-          "args": {
-            "data_dir": "/kaggle/working/",
-            "part": "test"
-          }
-        }
-      ]
     }
   },
   "optimizer": {
@@ -84,15 +71,15 @@
   "lr_scheduler": {
     "type": "OneCycleLR",
     "args": {
-      "steps_per_epoch": 500,
-      "epochs": 1000,
+      "steps_per_epoch": 100,
+      "epochs": 100,
       "anneal_strategy": "cos",
       "max_lr": 2e-4,
       "pct_start": 0.2
     }
   },
   "trainer": {
-    "epochs": 1000,
+    "epochs": 100,
     "save_dir": "saved/",
     "save_period": 5,
     "verbosity": 2,
