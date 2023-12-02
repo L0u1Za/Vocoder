@@ -184,7 +184,7 @@ class Trainer(BaseTrainer):
                 )
             self.writer.set_step(epoch * self.len_epoch, part)
             self._log_scalars(self.evaluation_metrics)
-            #self._log_predictions(**batch)
+            self._log_predictions(**batch)
             self._log_spectrogram(batch["spectrogram"])
 
         # add histogram of model parameters to the tensorboard
@@ -205,8 +205,8 @@ class Trainer(BaseTrainer):
     def _log_predictions(
             self,
             text,
-            log_probs,
-            log_probs_length,
+            audio_pred,
+            audio,
             audio_path,
             examples_to_log=10,
             *args,
@@ -215,27 +215,16 @@ class Trainer(BaseTrainer):
         # TODO: implement logging of beam search results
         if self.writer is None:
             return
-        argmax_inds = log_probs.cpu().argmax(-1).numpy()
-        argmax_inds = [
-            inds[: int(ind_len)]
-            for inds, ind_len in zip(argmax_inds, log_probs_length.numpy())
-        ]
-        argmax_texts_raw = [self.text_encoder.decode(inds) for inds in argmax_inds]
-        argmax_texts = [self.text_encoder.ctc_decode(inds) for inds in argmax_inds]
-        tuples = list(zip(argmax_texts, text, argmax_texts_raw, audio_path))
+
+        tuples = list(zip(text, audio, audio_pred, audio_path))
         shuffle(tuples)
         rows = {}
-        for pred, target, raw_pred, audio_path in tuples[:examples_to_log]:
-            target = BaseTextEncoder.normalize_text(target)
-            wer = calc_wer(target, pred) * 100
-            cer = calc_cer(target, pred) * 100
+        for text_cur, audio_cur, audio_pred_cur, audio_path_cur in tuples[:examples_to_log]:
 
-            rows[Path(audio_path).name] = {
-                "target": target,
-                "raw prediction": raw_pred,
-                "predictions": pred,
-                "wer": wer,
-                "cer": cer,
+            rows[Path(audio_path_cur).name] = {
+                "text": text_cur,
+                "audio": self.writer.wandb.Audio(audio_cur, sample_rate=self.config["preprocessing"]["sr"]),
+                "predicted_audio": self.writer.wandb.Audio(audio_pred_cur, sample_rate=self.config["preprocessing"]["sr"])
             }
         self.writer.add_table("predictions", pd.DataFrame.from_dict(rows, orient="index"))
 

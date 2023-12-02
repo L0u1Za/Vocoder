@@ -55,7 +55,7 @@ class Generator(nn.Module):
             nn.Tanh()
         )
 
-    def forward(self, inputs):
+    def forward(self, inputs, **batch):
         outputs = self.conv1(inputs)
         for layer in self.upsampling:
             outputs = layer(outputs)
@@ -209,12 +209,8 @@ class HiFiGAN(nn.Module):
         self.discriminator1 = MultiPeriodDiscriminator()
         self.discriminator2 = MultiScaleDiscriminator()
 
-    def forward(self, spectrogram, audio=None, **batch):
-        if (self.training):
-            pred = self.generator(spectrogram)
-            out_desc1 = self.discriminator1(audio.unsqueeze(1), pred)
-            out_desc2 = self.discriminator2(audio.unsqueeze(1), pred)
-            return pred.squeeze(1), out_desc1, out_desc2
-        else:
-            pred = self.generator(spectrogram)
-            return pred, None, None
+    def forward(self, spectrogram, audio, **batch):
+        pred = self.generator(spectrogram)
+        out_desc1 = self.discriminator1(audio.unsqueeze(1), pred)
+        out_desc2 = self.discriminator2(audio.unsqueeze(1), pred)
+        return pred.squeeze(1), out_desc1, out_desc2
