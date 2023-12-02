@@ -56,7 +56,7 @@ class Trainer(BaseTrainer):
             "generator_loss", "discriminator_loss", "total_loss", "grad norm", *[m.name for m in self.metrics], writer=self.writer
         )
         self.evaluation_metrics = MetricTracker(
-            "total_loss", *[m.name for m in self.metrics], writer=self.writer
+            "generator_loss", "discriminator_loss", "total_loss", *[m.name for m in self.metrics], writer=self.writer
         )
 
     @staticmethod
