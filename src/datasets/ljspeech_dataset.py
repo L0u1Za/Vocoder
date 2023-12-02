@@ -14,22 +14,16 @@ from tqdm import tqdm
 logger = logging.getLogger(__name__)
 
 URL_LINKS = {
-    "dataset": "https://data.keithito.com/data/speech/LJSpeech-1.1.tar.bz2",
+    "dataset": "https://data.keithito.com/data/speech/LJSpeech-1.1.tar.bz2", 
 }
 
 
 class LJspeechDataset(BaseDataset):
-    def __init__(self, part, data_dir=None, index_dir=None,*args, **kwargs):
+    def __init__(self, part, data_dir=None, *args, **kwargs):
         if data_dir is None:
             data_dir = ROOT_PATH / "data" / "datasets" / "ljspeech"
             data_dir.mkdir(exist_ok=True, parents=True)
         self._data_dir = data_dir
-        if index_dir is None:
-            index_dir = ROOT_PATH / "data" / "datasets" / "ljspeech"
-            index_dir.mkdir(exist_ok=True, parents=True)
-        else:
-            index_dir = Path(index_dir)
-        self._index_dir = index_dir
         index = self._get_or_load_index(part)
 
         super().__init__(index, *args, **kwargs)
@@ -45,7 +39,7 @@ class LJspeechDataset(BaseDataset):
         shutil.rmtree(str(self._data_dir / "LJSpeech-1.1"))
 
         files = [file_name for file_name in (self._data_dir / "wavs").iterdir()]
-        train_length = int(0.85 * len(files)) # hand split, test ~ 15%
+        train_length = int(0.85 * len(files)) # hand split, test ~ 15% 
         (self._data_dir / "train").mkdir(exist_ok=True, parents=True)
         (self._data_dir / "test").mkdir(exist_ok=True, parents=True)
         for i, fpath in enumerate((self._data_dir / "wavs").iterdir()):
@@ -57,7 +51,7 @@ class LJspeechDataset(BaseDataset):
 
 
     def _get_or_load_index(self, part):
-        index_path = self._index_dir / f"{part}_index.json"
+        index_path = self._data_dir / f"{part}_index.json"
         if index_path.exists():
             with index_path.open() as f:
                 index = json.load(f)
