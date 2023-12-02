@@ -33,7 +33,7 @@
           "args": {
             "data_dir": "/kaggle/working/",
             "part": "train",
-            "max_audio_length": 8.0,
+            "max_audio_length": 10.0,
             "max_text_length": 400
           }
         }
@@ -85,14 +85,14 @@
     "type": "OneCycleLR",
     "args": {
       "steps_per_epoch": 500,
-      "epochs": 500,
+      "epochs": 1000,
       "anneal_strategy": "cos",
       "max_lr": 2e-4,
       "pct_start": 0.2
     }
   },
   "trainer": {
-    "epochs": 500,
+    "epochs": 1000,
     "save_dir": "saved/",
     "save_period": 5,
     "verbosity": 2,
