@@ -56,14 +56,10 @@ class Generator(nn.Module):
         )
 
     def forward(self, inputs):
-        print(inputs.shape)
         outputs = self.conv1(inputs)
-        print(outputs.shape)
         for layer in self.upsampling:
             outputs = layer(outputs)
-            print(outputs.shape)
         outputs = self.conv2(outputs)
-        print(outputs.shape)
         return outputs
 
 class ScaleDiscriminator(nn.Module):
