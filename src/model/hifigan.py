@@ -1,7 +1,7 @@
 from torch import nn
 import torch
 import torch.nn.functional as F
-
+from torch.nn.utils import weight_norm
 
 def get_pad(kernel, dilation):
     return (kernel*dilation - dilation) // 2
@@ -12,7 +12,7 @@ class ResBlock(nn.Module):
         self.net = nn.ModuleList([
             nn.Sequential(
                 nn.LeakyReLU(),
-                nn.Conv1d(channels, channels, kernel_size, dilation=dilations[l], padding=get_pad(kernel_size, dilations[l]))
+                weight_norm(nn.Conv1d(channels, channels, kernel_size, dilation=dilations[l], padding=get_pad(kernel_size, dilations[l])))
             ) for l in range(len(dilations))
         ])
     def forward(self, inputs):
@@ -41,17 +41,17 @@ class Generator(nn.Module):
     def __init__(self, h_u, k_u, k_r, d_r):
         super().__init__()
 
-        self.conv1 = nn.Conv1d(80, h_u, kernel_size=7, stride=1, dilation=1, padding=3)
+        self.conv1 = weight_norm(nn.Conv1d(80, h_u, kernel_size=7, stride=1, dilation=1, padding=3))
         self.upsampling = nn.ModuleList([
             nn.Sequential(
                 nn.LeakyReLU(),
-                nn.ConvTranspose1d(h_u // 2 ** l, h_u // 2 ** (l + 1), kernel_size=k_u[l], stride=k_u[l] // 2, padding=(k_u[l]- k_u[l] // 2)//2),
+                weight_norm(nn.ConvTranspose1d(h_u // 2 ** l, h_u // 2 ** (l + 1), kernel_size=k_u[l], stride=k_u[l] // 2, padding=(k_u[l]- k_u[l] // 2)//2)),
                 MultiReceptiveField(h_u // 2 ** (l + 1), k_r, d_r)
             ) for l in range(len(k_u))
         ])
         self.conv2 = nn.Sequential(
             nn.LeakyReLU(),
-            nn.Conv1d(h_u // 2 ** (len(k_u)), 1, kernel_size=7, stride=1, padding=3),
+            weight_norm(nn.Conv1d(h_u // 2 ** (len(k_u)), 1, kernel_size=7, stride=1, padding=3)),
             nn.Tanh()
         )
 
@@ -68,31 +68,31 @@ class ScaleDiscriminator(nn.Module):
 
         self.conv1 = nn.ModuleList([
             nn.Sequential(
-                nn.Conv1d(1, 16, kernel_size=15, stride=1),
+                weight_norm(nn.Conv1d(1, 16, kernel_size=15, stride=1)),
                 nn.LeakyReLU()
             ),
             nn.Sequential(
-                nn.Conv1d(16, 64, kernel_size=41, stride=4, groups=4),
+                weight_norm(nn.Conv1d(16, 64, kernel_size=41, stride=4, groups=4)),
                 nn.LeakyReLU()
             ),
             nn.Sequential(
-                nn.Conv1d(64, 256, kernel_size=41, stride=4, groups=16),
+                weight_norm(nn.Conv1d(64, 256, kernel_size=41, stride=4, groups=16)),
                 nn.LeakyReLU()
             ),
             nn.Sequential(
-                nn.Conv1d(256, 1024, kernel_size=41, stride=4, groups=64),
+                weight_norm(nn.Conv1d(256, 1024, kernel_size=41, stride=4, groups=64)),
                 nn.LeakyReLU()
             ),
             nn.Sequential(
-                nn.Conv1d(1024, 1024, kernel_size=41, stride=4, groups=256),
+                weight_norm(nn.Conv1d(1024, 1024, kernel_size=41, stride=4, groups=256)),
                 nn.LeakyReLU()
             )
         ])
 
         self.conv2 = nn.Sequential(
-            nn.Conv1d(1024, 1024, kernel_size=5, stride=1),
+            weight_norm(nn.Conv1d(1024, 1024, kernel_size=5, stride=1)),
             nn.LeakyReLU(),
-            nn.Conv1d(1024, 1, kernel_size=3, stride=1)
+            weight_norm(nn.Conv1d(1024, 1, kernel_size=3, stride=1))
         )
 
     def forward(self, inputs):
@@ -144,19 +144,19 @@ class PeriodDiscriminator(nn.Module):
         self.period = p
         self.conv1 = nn.ModuleList([
             nn.Sequential(
-                nn.Conv2d(1, 2 ** 5, kernel_size=(5, 1), stride=(3, 1), padding=(get_pad(5, 1), 0)),
+                weight_norm(nn.Conv2d(1, 2 ** 5, kernel_size=(5, 1), stride=(3, 1), padding=(get_pad(5, 1), 0))),
                 nn.LeakyReLU()
             )] +
             [
             nn.Sequential(
-                nn.Conv2d(2 ** (5 + l - 1), 2 ** (5 + l), kernel_size=(5, 1), stride=(3, 1), padding=(get_pad(5, 1), 0)),
+                weight_norm(nn.Conv2d(2 ** (5 + l - 1), 2 ** (5 + l), kernel_size=(5, 1), stride=(3, 1), padding=(get_pad(5, 1), 0))),
                 nn.LeakyReLU()
             ) for l in range(1, 5)
         ])
         self.conv2 = nn.Sequential(
-            nn.Conv2d(2 ** (5 + 4), 1024, kernel_size=(5, 1), padding=(get_pad(5, 1), 0)),
+            weight_norm(nn.Conv2d(2 ** (5 + 4), 1024, kernel_size=(5, 1), padding=(get_pad(5, 1), 0))),
             nn.LeakyReLU(),
-            nn.Conv2d(1024, 1, kernel_size=(3, 1), padding=(get_pad(5, 1), 0))
+            weight_norm(nn.Conv2d(1024, 1, kernel_size=(3, 1), padding=(get_pad(5, 1), 0)))
         )
     def pad_and_reshape(self, outputs):
         b, c, t = outputs.shape
