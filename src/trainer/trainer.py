@@ -223,8 +223,8 @@ class Trainer(BaseTrainer):
 
             rows[Path(audio_path_cur).name] = {
                 "text": text_cur,
-                "audio": self.writer.wandb.Audio(audio_cur.detach().numpy(), sample_rate=self.config["preprocessing"]["sr"]),
-                "predicted_audio": self.writer.wandb.Audio(audio_pred_cur.detach().numpy(), sample_rate=self.config["preprocessing"]["sr"])
+                "audio": self.writer.wandb.Audio(audio_cur.detach().cpu().numpy(), sample_rate=self.config["preprocessing"]["sr"]),
+                "predicted_audio": self.writer.wandb.Audio(audio_pred_cur.detach().cpu().numpy(), sample_rate=self.config["preprocessing"]["sr"])
             }
         self.writer.add_table("predictions", pd.DataFrame.from_dict(rows, orient="index"))
 
