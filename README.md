@@ -2,7 +2,7 @@
 
 ## Report
 
-You may see the report if you follow [this link](https://api.wandb.ai/links/l0u1za/q4ofufk1)
+You may see the report if you follow [this link](https://wandb.ai/l0u1za/nv_project/reports/Vocoder--Vmlldzo2MTUwNDMz?accessToken=a3uw6fk71k1ind39vg6diiiss63qswtd4f9h8u6m9sigusc91wxa5qqjkczqqlsg)
 
 ## Installation guide
 
@@ -23,22 +23,14 @@ cd ./default_test_model
 
 It will be placed to `./default_test_model/checkpoint.pth`
 
-If you have some issues using bash utilities, you may download model directly from [google drive](https://drive.google.com/drive/folders/12nfElb7A6v7Y6Kd0z8qsIQo9FRUS2dg4?usp=sharing)
+If you have some issues using bash utilities, you may download model directly from [google drive](https://drive.google.com/file/d/1ZAu0x9M6A_xAr-h_fCLjbZqSlB9WftNe/view?usp=sharing)
 
-
-## Run unit tests
-
-You may check the correct work of implementation using unit tests
-
-```shell
-python -m unittest discover src/tests
-```
 
 ## Run test model with prepared configuration
 
 ```shell
 python test.py \
-   -c default_test_config.json \
+   -c default_test_model/config.json \
    -r default_test_model/checkpoint.pth \
    -t test_data \
    -o test_result.json
